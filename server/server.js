@@ -14,6 +14,14 @@ const {
   saveErrorDataFile
 } = require("./help");
 
+process.on("uncaughtException", err => {
+  console.error("❌ Uncaught Exception:", err);
+});
+
+process.on("unhandledRejection", err => {
+  console.error("❌ Unhandled Promise Rejection:", err);
+});
+
 let app = express(),
   router = express.Router(),
   cwd = process.cwd(),
