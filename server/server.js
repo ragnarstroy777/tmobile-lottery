@@ -222,7 +222,7 @@ function loadData() {
   let cfgData = {};
 
   // curData.users = loadXML(path.join(cwd, "data/users.xlsx"));
-  curData.users = loadXML(path.join(dataBath, "data/users.xlsx"));
+curData.users = loadXML(path.join(__dirname, "data", "users.xlsx"));
   // Перетасовать список
   shuffle(curData.users);
 
