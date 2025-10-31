@@ -221,10 +221,15 @@ function loadData() {
   console.log("Загрузка файла данных Excel");
   let cfgData = {};
 
-  // curData.users = loadXML(path.join(cwd, "data/users.xlsx"));
-curData.users = loadXML(path.join(__dirname, "data", "users.xlsx"));
-  // Перетасовать список
+try {
+  curData.users = loadXML(path.join(__dirname, "data", "users.xlsx"));
   shuffle(curData.users);
+  console.log("✅ Users loaded from Excel");
+} catch (e) {
+  curData.users = [];
+  console.error("❌ Ошибка загрузки users.xlsx:", e.message);
+}
+
 
   // Загрузить ранее разыгранные результаты
   loadTempData()
