@@ -58,11 +58,12 @@ app.get("/", (req, res) => {
 });
 
 // Разрешаем CORS
-app.all("/*", (req, res, next) => {
-  log(`Запрос: ${JSON.stringify(req.path)}`);
+app.use((req, res, next) => {
+  console.log(`Запрос: ${req.path}`);
   next();
-}); {
-  res.header("Access-Control-Allow-Origin", "*");
+});
+ {
+  res.header("Access-Control-Allow-Origin", "/*");
   res.header("Access-Control-Allow-Headers", "X-Requested-With");
   res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
   res.header("X-Powered-By", " 3.2.1");
