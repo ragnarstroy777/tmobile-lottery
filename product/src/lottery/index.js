@@ -29,8 +29,8 @@ window.AJAX = function (param) {
   );
 
   // Собираем абсолютный путь (даже если opt.url начинается со слэша)
-  const url =
-    API_URL + (opt.url.startsWith("/") ? "" : "/") + opt.url.replace(/^\/+/, "");
+ const url = `${API_URL.replace(/\/+$/, "")}/${opt.url.replace(/^\/+/, "")}`;
+
 
   const xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function () {
@@ -855,7 +855,7 @@ function startLotteryFlow(source = "button") {
 function initAll() {
   updateResponsiveLayout(true);
   window.AJAX({
-    url: `${API_URL}/getTempData`,
+    url: `/getTempData`,
     success(data) {
       // Получение базовых данных
       prizes = data.cfgData.prizes;
@@ -877,7 +877,7 @@ function initAll() {
   });
 
   window.AJAX({
-    url: `${API_URL}/getUsers`,
+    url: `/getUsers`,
     success(data) {
       basicData.users = data;
 
@@ -1729,7 +1729,7 @@ function shineCard() {
 function setData(type, data) {
   return new Promise((resolve, reject) => {
     window.AJAX({
-      url: `${API_URL}/saveData`,
+      url: `/saveData`,
       data: {
         type,
         data
@@ -1747,7 +1747,7 @@ function setData(type, data) {
 function setErrorData(data) {
   return new Promise((resolve, reject) => {
     window.AJAX({
-      url: `${API_URL}/errorData`,
+      url: `/errorData`,
       data: {
         data
       },
@@ -1763,7 +1763,7 @@ function setErrorData(data) {
 
 function exportData() {
   window.AJAX({
-    url: `${API_URL}/export`,
+    url: `/export`,
     success(data) {
       if (data.type === "success") {
         location.href = data.url;
@@ -1774,7 +1774,7 @@ function exportData() {
 
 function reset() {
   window.AJAX({
-    url: `${API_URL}/reset`,
+    url: `/reset`,
     success(data) {
       console.log("Сброс выполнен");
     }

@@ -1,8 +1,10 @@
+// server/server.js
 const express = require("express");
 const opn = require("opn");
 const bodyParser = require("body-parser");
 const path = require("path");
 const chokidar = require("chokidar");
+const cors = require("cors");
 const cfg = require("./config");
 
 const {
@@ -14,70 +16,62 @@ const {
   saveErrorDataFile
 } = require("./help");
 
+// ---- safety logs
 process.on("uncaughtException", err => {
   console.error("❌ Uncaught Exception:", err);
 });
-
 process.on("unhandledRejection", err => {
   console.error("❌ Unhandled Promise Rejection:", err);
 });
 
-let app = express(),
-  router = express.Router(),
-  cwd = process.cwd(),
-  dataBath = __dirname,
-  port = 8090,
-  curData = {},
-  luckyData = {},
-  errorData = [],
-  defaultType = cfg.prizes[0]["type"],
-  defaultPage = `default data`;
+// ---- app & state
+const app = express();
+const router = express.Router();
+const cwd = process.cwd();
+const dataBath = __dirname; // (не используется, но оставил)
+let port = 8090;
+let curData = {};
+let luckyData = {};
+let errorData = [];
+const defaultType = cfg.prizes[0]["type"];
+const defaultPage = `default data`;
 
-// Используем формат JSON для параметров
+// ---- CORS: обязательно раньше любых роутов
 app.use(
-  bodyParser.json({
-    limit: "1mb"
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"],
+    allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept"]
   })
 );
 
-app.use(
-  bodyParser.urlencoded({
-    extended: true
-  })
-);
+// ---- body parsers
+app.use(bodyParser.json({ limit: "1mb" }));
+app.use(bodyParser.urlencoded({ extended: true }));
 
+// ---- cli port override
 if (process.argv.length > 2) {
   port = process.argv[2];
 }
 
+// ---- static
 app.use(express.static(cwd));
 
-// Пустой путь: перенаправление на index.html
+// ---- root -> index.html
 app.get("/", (req, res) => {
   res.redirect(301, "index.html");
 });
 
-// Разрешаем CORS
-app.use((req, res, next) => {
-  console.log(`Запрос: ${req.path}`);
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
-  res.header("X-Powered-By", "3.2.1");
-  res.header("Content-Type", "application/json;charset=utf-8");
-  next();
-});
-
-
-
+// ---- simple logger for POST
 app.post(/.*/, (req, res, next) => {
   console.log(`Запрос: ${req.path}`);
   next();
 });
 
+// ===== API =====
 
-// Получить ранее сохранённые данные
-router.post("/getTempData", (req, res, next) => {
+// вернуть ранее сохранённые данные
+router.post("/getTempData", (req, res) => {
   getLeftUsers();
   res.json({
     cfgData: cfg,
@@ -86,83 +80,73 @@ router.post("/getTempData", (req, res, next) => {
   });
 });
 
-// Сбросить данные
-router.post("/reset", (req, res, next) => {
+// сброс
+router.post("/reset", (req, res) => {
   luckyData = {};
   errorData = [];
   log(`Сброс данных выполнен`);
   saveErrorDataFile(errorData);
-  return saveDataFile(luckyData).then(data => {
-    res.json({
-      type: "success"
-    });
+  saveDataFile(luckyData).then(() => {
+    res.json({ type: "success" });
   });
 });
 
-// Получить всех пользователей
-router.post("/getUsers", (req, res, next) => {
+// пользователи
+router.post("/getUsers", (req, res) => {
   res.json(curData.users);
   log(`Отправлены данные пользователей для розыгрыша`);
 });
 
-// Получить информацию о призах
-router.post("/getPrizes", (req, res, next) => {
-  // res.json(curData.prize);
+// призы (сейчас только лог)
+router.post("/getPrizes", (req, res) => {
   log(`Отправлены данные о призах`);
+  res.json({ ok: true });
 });
 
-// Сохранить данные розыгрыша
-router.post("/saveData", (req, res, next) => {
-  let data = req.body;
+// сохранить результаты розыгрыша
+router.post("/saveData", (req, res) => {
+  const data = req.body;
   setLucky(data.type, data.data)
-    .then(t => {
-      res.json({
-        type: "success"
-      });
+    .then(() => {
+      res.json({ type: "success" });
       log(`Данные о призах сохранены`);
     })
-    .catch(data => {
-      res.json({
-        type: "error"
-      });
+    .catch(() => {
+      res.json({ type: "error" });
       log(`Не удалось сохранить данные о призах`);
     });
 });
 
-// Сохранить данные об отсутствующих участниках
-router.post("/errorData", (req, res, next) => {
-  let data = req.body;
+// сохранить отсутствующих
+router.post("/errorData", (req, res) => {
+  const data = req.body;
   setErrorData(data.data)
-    .then(t => {
-      res.json({
-        type: "success"
-      });
+    .then(() => {
+      res.json({ type: "success" });
       log(`Список отсутствующих участников сохранён`);
     })
-    .catch(data => {
-      res.json({
-        type: "error"
-      });
+    .catch(() => {
+      res.json({ type: "error" });
       log(`Не удалось сохранить список отсутствующих участников`);
     });
 });
 
-// Экспорт данных в Excel
-router.post("/export", (req, res, next) => {
-  let outData = [["Приз", "Описание", "Дата"]];
+// экспорт в Excel
+router.post("/export", (req, res) => {
+  const outData = [["Приз", "Описание", "Дата"]];
+
   cfg.prizes.forEach(item => {
     const prizeName = item.text || "";
     outData.push([prizeName, "", ""]);
     const records = luckyData[item.type] || [];
+
     records.forEach(record => {
       if (Array.isArray(record)) {
         const [, name, extra] = record;
         outData.push([prizeName, name || record[0] || "", extra || ""]);
       } else if (record && typeof record === "object") {
         const label = record.label || "";
-        const ts = record.timestamp
-          ? new Date(record.timestamp).toLocaleString()
-          : "";
+        const ts = record.timestamp ? new Date(record.timestamp).toLocaleString() : "";
         outData.push([prizeName, label, ts]);
       } else {
         outData.push([prizeName, String(record || ""), ""]);
@@ -171,8 +155,7 @@ router.post("/export", (req, res, next) => {
   });
 
   writeXML(outData, "/results.xlsx")
-    .then(dt => {
-      // res.download('/results.xlsx');
+    .then(() => {
       res.status(200).json({
         type: "success",
         url: "results.xlsx"
@@ -180,15 +163,15 @@ router.post("/export", (req, res, next) => {
       log(`Экспорт данных выполнен успешно`);
     })
     .catch(err => {
-      res.json({
+      res.status(500).json({
         type: "error",
-        error: err.error
+        error: err.message || err
       });
-      log(`Ошибка экспорта данных`);
+      log(`Ошибка экспорта данных: ${err && err.message}`);
     });
 });
 
-// Для непопадающих под маршруты запросов возвращаем дефолтную страницу
+// fallback для прочих путей
 router.all(/.*/, (req, res) => {
   if (req.method.toLowerCase() === "get") {
     if (/\.(html|htm)/.test(req.originalUrl)) {
@@ -198,17 +181,14 @@ router.all(/.*/, (req, res) => {
       res.status(404).end();
     }
   } else if (req.method.toLowerCase() === "post") {
-    let postBackData = {
-      error: "empty"
-    };
-    res.send(JSON.stringify(postBackData));
+    res.json({ error: "empty" });
   }
 });
 
-
+// ==== helpers ====
 function log(text) {
-  global.console.log(text);
-  global.console.log("-----------------------------------------------");
+  console.log(text);
+  console.log("-----------------------------------------------");
 }
 
 function setLucky(type, data) {
@@ -217,13 +197,11 @@ function setLucky(type, data) {
   } else {
     luckyData[type] = Array.isArray(data) ? data : [data];
   }
-
   return saveDataFile(luckyData);
 }
 
 function setErrorData(data) {
   errorData = errorData.concat(data);
-
   return saveErrorDataFile(errorData);
 }
 
@@ -231,88 +209,75 @@ app.use(router);
 
 function loadData() {
   console.log("Загрузка файла данных Excel");
-  let cfgData = {};
+  try {
+    curData.users = loadXML(path.join(__dirname, "data", "users.xlsx"));
+    shuffle(curData.users);
+    console.log("✅ Users loaded from Excel");
+  } catch (e) {
+    curData.users = [];
+    console.error("❌ Ошибка загрузки users.xlsx:", e.message);
+  }
 
-try {
-  curData.users = loadXML(path.join(__dirname, "data", "users.xlsx"));
-  shuffle(curData.users);
-  console.log("✅ Users loaded from Excel");
-} catch (e) {
-  curData.users = [];
-  console.error("❌ Ошибка загрузки users.xlsx:", e.message);
-}
-
-
-  // Загрузить ранее разыгранные результаты
   loadTempData()
     .then(data => {
       luckyData = data[0];
       errorData = data[1];
     })
-    .catch(data => {
+    .catch(() => {
       curData.leftUsers = Object.assign([], curData.users);
     });
 }
 
 function getLeftUsers() {
-  // Отметить уже разыгранных пользователей
-  let lotteredUser = {};
-  for (let key in luckyData) {
-    let luckys = luckyData[key];
-    luckys.forEach(item => {
-      if (Array.isArray(item)) {
-        lotteredUser[item[0]] = true;
-      }
+  const lotteredUser = {};
+  for (const key in luckyData) {
+    (luckyData[key] || []).forEach(item => {
+      if (Array.isArray(item)) lotteredUser[item[0]] = true;
     });
   }
-  // Отметить отсутствующих пользователей
   errorData.forEach(item => {
-    if (Array.isArray(item)) {
-      lotteredUser[item[0]] = true;
-    }
+    if (Array.isArray(item)) lotteredUser[item[0]] = true;
   });
 
   let leftUsers = Object.assign([], curData.users);
-  leftUsers = leftUsers.filter(user => {
-    return !lotteredUser[user[0]];
-  });
+  leftUsers = leftUsers.filter(user => !lotteredUser[user[0]]);
   curData.leftUsers = leftUsers;
 }
 
 loadData();
 
-app.get('/ping', (req, res) => {
-  res.json({ status: 'ok', message: 'pong 🏓' });
+// ping
+app.get("/ping", (req, res) => {
+  res.json({ status: "ok", message: "pong 🏓" });
 });
 
+// ==== экспорт для локального запуска ====
 module.exports = {
-  run: function(devPort, noOpen) {
+  run: function (devPort, noOpen) {
     let openBrowser = true;
     if (process.argv.length > 3) {
-      if (process.argv[3] && (process.argv[3] + "").toLowerCase() === "n") {
+      if ((process.argv[3] + "").toLowerCase() === "n") {
         openBrowser = false;
       }
     }
+    if (noOpen) openBrowser = noOpen !== "n";
+    if (devPort) port = devPort;
 
-    if (noOpen) {
-      openBrowser = noOpen !== "n";
-    }
-
-    if (devPort) {
-      port = devPort;
-    }
-
-    let server = app.listen(port, () => {
-      let host = server.address().address;
-      let port = server.address().port;
-      global.console.log(`lottery server listenig at http://${host}:${port}`);
-      openBrowser && opn(`http://127.0.0.1:${port}`);
+    const server = app.listen(port, () => {
+      const host = server.address().address;
+      const prt = server.address().port;
+      console.log(`lottery server listening at http://${host}:${prt}`);
+      openBrowser && opn(`http://127.0.0.1:${prt}`);
     });
   }
 };
 
-// --- keep server alive for Render ---
-const PORT = process.env.PORT || 8888;
-app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-});
+// ==== запуск на Render/проде ====
+// Слушаем порт только если файл исполняется напрямую,
+// чтобы не конфликтовать с module.exports.run()
+if (require.main === module) {
+  const PORT = process.env.PORT || 8888;
+  app.listen(PORT, () => {
+    console.log(`✅ Server running on port ${PORT}`);
+  });
+}
