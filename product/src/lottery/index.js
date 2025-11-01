@@ -11,7 +11,8 @@ import {
 import { NUMBER_MATRIX } from "./config.js";
 import { initGestureStopper, allowImmediateSpin } from "./gesture.js";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://tmobile-lottery-api.onrender.com";
+const API_URL = "https://tmobile-lottery-api.onrender.com";
+console.log("✅ API_URL =", API_URL);
 
 const ROTATE_TIME = 3000;
 const ROTATE_LOOP = 1000;
