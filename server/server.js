@@ -58,16 +58,19 @@ app.get("/", (req, res) => {
 });
 
 // Разрешаем CORS
-app.all("*", function(req, res, next) {
+app.all("/*", (req, res, next) => {
+  log(`Запрос: ${JSON.stringify(req.path)}`);
+  next();
+}); {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "X-Requested-With");
   res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
   res.header("X-Powered-By", " 3.2.1");
   res.header("Content-Type", "application/json;charset=utf-8");
   next();
-});
+};
 
-app.post("*", (req, res, next) => {
+app.post("/*", (req, res, next) => {
   log(`Запрос: ${JSON.stringify(req.path, 2)}`);
   next();
 });
@@ -186,7 +189,7 @@ router.post("/export", (req, res, next) => {
 
 // Для непопадающих под маршруты запросов возвращаем дефолтную страницу
 // Разные ответы для GET/POST
-router.all("*", (req, res) => {
+router.all("/*", (req, res) => {
   if (req.method.toLowerCase() === "get") {
     if (/\.(html|htm)/.test(req.originalUrl)) {
       res.set("Content-Type", "text/html");
