@@ -307,3 +307,9 @@ module.exports = {
     });
   }
 };
+
+// --- keep server alive for Render ---
+const PORT = process.env.PORT || 8888;
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+});
