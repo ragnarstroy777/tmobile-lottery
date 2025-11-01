@@ -1849,4 +1849,7 @@ window.onload = function () {
   setTimeout(function () {
     musicBox.click();
   }, 1000);
+
+  console.log("🔥 FRONTEND INDEX.JS LOADED 🔥");
+
 };
