@@ -70,10 +70,11 @@ app.use((req, res, next) => {
 
 
 
-app.post("/*", (req, res, next) => {
-  log(`Запрос: ${JSON.stringify(req.path, 2)}`);
+app.post(/.*/, (req, res, next) => {
+  console.log(`Запрос: ${req.path}`);
   next();
 });
+
 
 // Получить ранее сохранённые данные
 router.post("/getTempData", (req, res, next) => {
