@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "description": "Розыгрыш",
   "main": "index.js",
-  "scripts": {
-    "start": "cd dist && node ../../server/index.js 8888",
+  ""scripts": {
+  "start": "node server.js"
+}
+
     "serve": "npm run start",
     "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider webpack --mode=production --progress --colors",
     "dev": "cross-env NODE_OPTIONS=--openssl-legacy-provider webpack-dev-server --config webpack.dev.js --mode=development --progress --colors"
