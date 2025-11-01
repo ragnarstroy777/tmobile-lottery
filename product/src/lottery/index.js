@@ -14,23 +14,38 @@ import { initGestureStopper, allowImmediateSpin } from "./gesture.js";
 const API_URL = "https://tmobile-lottery-api.onrender.com";
 console.log("✅ API_URL =", API_URL);
 
-window.AJAX = function (param) {
-  fetch(`${API_URL}${param.url}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(param.data || {}),
-  })
-    .then(res => res.json())
-    .then(data => {
-      if (param.success) param.success(data);
-    })
-    .catch(err => {
-      console.error("Произошла ошибка при выполнении запроса:", param.url);
-      console.error(err);
-    });
+window.AJAX = function (opt) {
+  const API_URL = "https://tmobile-lottery-api.onrender.com";
+  opt = Object.assign({ type: "POST", async: true }, opt);
+
+  try {
+    const xhr = new XMLHttpRequest();
+    const url = `${API_URL}${opt.url}`;
+
+    xhr.open(opt.type, url, opt.async);
+    xhr.setRequestHeader("Content-Type", "application/json");
+
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4) {
+        if (xhr.status === 200) {
+          try {
+            const res = JSON.parse(xhr.responseText);
+            opt.success && opt.success(res);
+          } catch (e) {
+            console.error("Ошибка парсинга ответа:", e);
+          }
+        } else {
+          console.error("Ошибка запроса:", xhr.status, xhr.responseText);
+        }
+      }
+    };
+
+    xhr.send(opt.data ? JSON.stringify(opt.data) : null);
+  } catch (e) {
+    console.error("Ошибка AJAX:", e);
+  }
 };
+
 
 
 const ROTATE_TIME = 3000;
