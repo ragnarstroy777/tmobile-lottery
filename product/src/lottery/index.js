@@ -14,6 +14,25 @@ import { initGestureStopper, allowImmediateSpin } from "./gesture.js";
 const API_URL = "https://tmobile-lottery-api.onrender.com";
 console.log("✅ API_URL =", API_URL);
 
+window.AJAX = function (param) {
+  fetch(`${API_URL}${param.url}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(param.data || {}),
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (param.success) param.success(data);
+    })
+    .catch(err => {
+      console.error("Произошла ошибка при выполнении запроса:", param.url);
+      console.error(err);
+    });
+};
+
+
 const ROTATE_TIME = 3000;
 const ROTATE_LOOP = 1000;
 const MIN_SPIN_MS = 1000; // минимум 1s до допуска жеста стоп
