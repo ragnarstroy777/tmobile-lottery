@@ -189,7 +189,6 @@ router.post("/export", (req, res, next) => {
 });
 
 // Для непопадающих под маршруты запросов возвращаем дефолтную страницу
-// Разные ответы для GET/POST
 router.all(/.*/, (req, res) => {
   if (req.method.toLowerCase() === "get") {
     if (/\.(html|htm)/.test(req.originalUrl)) {
