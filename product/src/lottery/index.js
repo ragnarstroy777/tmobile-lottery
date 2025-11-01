@@ -11,40 +11,55 @@ import {
 import { NUMBER_MATRIX } from "./config.js";
 import { initGestureStopper, allowImmediateSpin } from "./gesture.js";
 
+// === API base for Render backend ===
 const API_URL = "https://tmobile-lottery-api.onrender.com";
 console.log("✅ API_URL =", API_URL);
 
-window.AJAX = function (opt) {
-  const API_URL = "https://tmobile-lottery-api.onrender.com";
-  opt = Object.assign({ type: "POST", async: true }, opt);
+// Переопределяем глобальный AJAX — всегда использует абсолютный URL
+window.AJAX = function (param) {
+  const opt = Object.assign(
+    {
+      type: "POST",
+      async: true,
+      isJSON: true,
+      data: {},
+      headers: { "Content-Type": "application/json;charset=utf-8" },
+    },
+    param || {}
+  );
 
-  try {
-    const xhr = new XMLHttpRequest();
-    const url = `${API_URL}${opt.url}`;
+  // Собираем абсолютный путь (даже если opt.url начинается со слэша)
+  const url =
+    API_URL + (opt.url.startsWith("/") ? "" : "/") + opt.url.replace(/^\/+/, "");
 
-    xhr.open(opt.type, url, opt.async);
-    xhr.setRequestHeader("Content-Type", "application/json");
-
-    xhr.onreadystatechange = function () {
-      if (xhr.readyState === 4) {
-        if (xhr.status === 200) {
-          try {
-            const res = JSON.parse(xhr.responseText);
-            opt.success && opt.success(res);
-          } catch (e) {
-            console.error("Ошибка парсинга ответа:", e);
-          }
-        } else {
-          console.error("Ошибка запроса:", xhr.status, xhr.responseText);
+  const xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4) {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const resText = xhr.responseText || "";
+          const res = opt.isJSON ? (resText ? JSON.parse(resText) : {}) : resText;
+          opt.success && opt.success(res);
+        } catch (e) {
+          console.error("Ошибка парсинга ответа:", e);
         }
+      } else {
+        console.error("❌ Ошибка запроса:", xhr.status, url);
+        opt.error && opt.error(xhr);
       }
-    };
+    }
+  };
 
-    xhr.send(opt.data ? JSON.stringify(opt.data) : null);
-  } catch (e) {
-    console.error("Ошибка AJAX:", e);
+  xhr.open(opt.type, url, opt.async);
+  for (const [k, v] of Object.entries(opt.headers || {})) {
+    xhr.setRequestHeader(k, v);
   }
+  xhr.send(opt.isJSON ? JSON.stringify(opt.data || {}) : opt.data || null);
+
+  // 👇 Добавляем лог для наглядности
+  console.log("➡️ AJAX", opt.type, url, opt.data || {});
 };
+
 
 
 
