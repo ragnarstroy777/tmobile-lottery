@@ -11,6 +11,8 @@ import {
 import { NUMBER_MATRIX } from "./config.js";
 import { initGestureStopper, allowImmediateSpin } from "./gesture.js";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://tmobile-lottery-api.onrender.com";
+
 const ROTATE_TIME = 3000;
 const ROTATE_LOOP = 1000;
 const MIN_SPIN_MS = 1000; // минимум 1s до допуска жеста стоп
@@ -803,7 +805,7 @@ function startLotteryFlow(source = "button") {
 function initAll() {
   updateResponsiveLayout(true);
   window.AJAX({
-    url: "/getTempData",
+    url: `${API_URL}/getTempData`,
     success(data) {
       // Получение базовых данных
       prizes = data.cfgData.prizes;
@@ -825,7 +827,7 @@ function initAll() {
   });
 
   window.AJAX({
-    url: "/getUsers",
+    url: `${API_URL}/getUsers`,
     success(data) {
       basicData.users = data;
 
@@ -1677,7 +1679,7 @@ function shineCard() {
 function setData(type, data) {
   return new Promise((resolve, reject) => {
     window.AJAX({
-      url: "/saveData",
+      url: `${API_URL}/saveData`,
       data: {
         type,
         data
@@ -1695,7 +1697,7 @@ function setData(type, data) {
 function setErrorData(data) {
   return new Promise((resolve, reject) => {
     window.AJAX({
-      url: "/errorData",
+      url: `${API_URL}/errorData`,
       data: {
         data
       },
@@ -1711,7 +1713,7 @@ function setErrorData(data) {
 
 function exportData() {
   window.AJAX({
-    url: "/export",
+    url: `${API_URL}/export`,
     success(data) {
       if (data.type === "success") {
         location.href = data.url;
@@ -1722,7 +1724,7 @@ function exportData() {
 
 function reset() {
   window.AJAX({
-    url: "/reset",
+    url: `${API_URL}/reset`,
     success(data) {
       console.log("Сброс выполнен");
     }

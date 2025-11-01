@@ -282,6 +282,10 @@ function getLeftUsers() {
 
 loadData();
 
+app.get('/ping', (req, res) => {
+  res.json({ status: 'ok', message: 'pong 🏓' });
+});
+
 module.exports = {
   run: function(devPort, noOpen) {
     let openBrowser = true;
