@@ -252,32 +252,12 @@ app.get("/ping", (req, res) => {
 });
 
 // ==== экспорт для локального запуска ====
-module.exports = {
-  run: function (devPort, noOpen) {
-    let openBrowser = true;
-    if (process.argv.length > 3) {
-      if ((process.argv[3] + "").toLowerCase() === "n") {
-        openBrowser = false;
-      }
-    }
-    if (noOpen) openBrowser = noOpen !== "n";
-    if (devPort) port = devPort;
-
-    const server = app.listen(port, () => {
-      const host = server.address().address;
-      const prt = server.address().port;
-      console.log(`lottery server listening at http://${host}:${prt}`);
-      openBrowser && opn(`http://127.0.0.1:${prt}`);
-    });
-  }
-};
 
 // ==== запуск на Render/проде ====
 // Слушаем порт только если файл исполняется напрямую,
 // чтобы не конфликтовать с module.exports.run()
-if (require.main === module) {
-  const PORT = process.env.PORT || 8888;
-  app.listen(PORT, () => {
-    console.log(`✅ Server running on port ${PORT}`);
-  });
-}
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`✅ Server running on port ${PORT}`);
+});
+
