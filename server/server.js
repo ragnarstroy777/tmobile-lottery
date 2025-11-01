@@ -190,7 +190,7 @@ router.post("/export", (req, res, next) => {
 
 // Для непопадающих под маршруты запросов возвращаем дефолтную страницу
 // Разные ответы для GET/POST
-router.all("/*", (req, res) => {
+router.all(/.*/, (req, res) => {
   if (req.method.toLowerCase() === "get") {
     if (/\.(html|htm)/.test(req.originalUrl)) {
       res.set("Content-Type", "text/html");
@@ -205,6 +205,7 @@ router.all("/*", (req, res) => {
     res.send(JSON.stringify(postBackData));
   }
 });
+
 
 function log(text) {
   global.console.log(text);
