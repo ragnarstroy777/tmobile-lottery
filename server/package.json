@@ -2,7 +2,7 @@
   "name": "tmobile-lottery-api",
   "version": "1.0.0",
   "description": "T-Mobile lottery backend",
-  "main": "server/server.js",
+  "main": "server.js",
   "scripts": {
     "start": "node server/server.js"
   },
