@@ -171,6 +171,12 @@ router.post("/export", (req, res) => {
     });
 });
 
+// Serve frontend
+app.use(express.static(path.join(__dirname, "../product/src")));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "../product/src/index.html"));
+});
+
 // fallback для прочих путей
 router.all(/.*/, (req, res) => {
   if (req.method.toLowerCase() === "get") {
