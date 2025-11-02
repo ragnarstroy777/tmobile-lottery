@@ -251,11 +251,13 @@ app.get("/ping", (req, res) => {
   res.json({ status: "ok", message: "pong 🏓" });
 });
 
-// ==== экспорт для локального запуска ====
+// ---- serve frontend
+app.use(express.static(path.join(__dirname, "../product/src")));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "../product/src/index.html"));
+});
 
 // ==== запуск на Render/проде ====
-// Слушаем порт только если файл исполняется напрямую,
-// чтобы не конфликтовать с module.exports.run()
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`✅ Server running on port ${PORT}`);
