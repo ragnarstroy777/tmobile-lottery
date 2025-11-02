@@ -252,9 +252,9 @@ app.get("/ping", (req, res) => {
 });
 
 // ---- serve frontend
-app.use(express.static(path.join(__dirname, "../product/src")));
+app.use(express.static(path.join(__dirname, "./product/src")));
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../product/src/index.html"));
+  res.sendFile(path.join(__dirname, "./product/src/index.html"));
 });
 
 // ==== запуск на Render/проде ====
