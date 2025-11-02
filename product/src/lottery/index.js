@@ -11,8 +11,12 @@ import {
 import { NUMBER_MATRIX } from "./config.js";
 import { initGestureStopper, allowImmediateSpin } from "./gesture.js";
 
-// === API base for Render backend ===
-const API_URL = "https://tmobile-lottery-api.onrender.com";
+// === API base — автоматически подхватывает правильный адрес ===
+const API_URL =
+  window.location.origin.includes("localhost") || window.location.origin.includes("127.0.0.1")
+    ? "http://localhost:10000"
+    : window.location.origin;
+
 console.log("✅ API_URL =", API_URL);
 
 // Переопределяем глобальный AJAX — всегда использует абсолютный URL

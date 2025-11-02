@@ -28,7 +28,6 @@ process.on("unhandledRejection", err => {
 const app = express();
 const router = express.Router();
 const cwd = process.cwd();
-const dataBath = __dirname; // (не используется, но оставил)
 let port = 8090;
 let curData = {};
 let luckyData = {};
@@ -36,7 +35,7 @@ let errorData = [];
 const defaultType = cfg.prizes[0]["type"];
 const defaultPage = `default data`;
 
-// ---- CORS: обязательно раньше любых роутов
+// ---- CORS
 app.use(
   cors({
     origin: "*",
@@ -53,14 +52,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 if (process.argv.length > 2) {
   port = process.argv[2];
 }
-
-// ---- static
-app.use(express.static(cwd));
-
-// ---- root -> index.html
-app.get("/", (req, res) => {
-  res.redirect(301, "index.html");
-});
 
 // ---- simple logger for POST
 app.post(/.*/, (req, res, next) => {
@@ -97,7 +88,7 @@ router.post("/getUsers", (req, res) => {
   log(`Отправлены данные пользователей для розыгрыша`);
 });
 
-// призы (сейчас только лог)
+// призы
 router.post("/getPrizes", (req, res) => {
   log(`Отправлены данные о призах`);
   res.json({ ok: true });
@@ -169,12 +160,6 @@ router.post("/export", (req, res) => {
       });
       log(`Ошибка экспорта данных: ${err && err.message}`);
     });
-});
-
-// Serve frontend
-app.use(express.static(path.join(__dirname, "../product/src")));
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../product/src/index.html"));
 });
 
 // fallback для прочих путей
@@ -257,15 +242,14 @@ app.get("/ping", (req, res) => {
   res.json({ status: "ok", message: "pong 🏓" });
 });
 
-// ---- serve frontend
+// ✅ единственный блок фронта (правильный)
 app.use(express.static(path.join(__dirname, "../product/src")));
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../product/src/index.html"));
 });
 
-// ==== запуск на Render/проде ====
+// ==== запуск на Render ====
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
-

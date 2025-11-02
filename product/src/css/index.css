@@ -1,77 +1,212 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Розыгрыш призов</title>
-    <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
-    />
-    <link rel="stylesheet" href="./index.css" />
-  </head>
+/* === Базовые настройки === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
 
-  <body>
-    <script src="./lib/three.min.js"></script>
-    <script src="./lib/tween.min.js"></script>
-    <script src="./lib/TrackballControls.js"></script>
-    <script src="./lib/CSS3DRenderer.js"></script>
+body {
+  background: radial-gradient(circle at center, #0d0d16 0%, #000 80%);
+  color: #fff;
+  font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+  overflow: hidden;
+  touch-action: none;
+}
 
-    <!-- MediaPipe -->
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
 
-    <div class="canvas-box">
-      <canvas id="canvas">Ваш браузер не поддерживает canvas</canvas>
-    </div>
+/* === Музыка === */
+.music {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  z-index: 100;
+}
 
-    <div class="music">
-      <audio id="music" src="./data/music.mp3" class="music-item" loop></audio>
-      <div id="musicBox" class="music-box" title="Воспроизвести/Пауза фоновой музыки">
-        Музыка
-      </div>
-    </div>
+.music-box {
+  display: inline-block;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: rgba(255, 0, 122, 0.25);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
 
-    <div class="brand-logo">
-      <div class="brand-logo__inner">
-        <img src="./img/timobile-logo.svg" alt="Логотип T-Mobile" />
-      </div>
-    </div>
+.music-box:hover {
+  background: rgba(255, 0, 122, 0.45);
+  transform: scale(1.05);
+}
 
-    <div id="prizeBar"></div>
-    <div id="container"></div>
+/* === Логотип бренда === */
+.brand-logo {
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+}
 
-    <div id="qrPrompt" class="qr-prompt">
-      <img
-        src="./img/qrcode.svg"
-        alt="QR-код"
-        class="qr-placeholder"
-        width="188"
-        height="188"
-      />
-      <div class="qr-label">
-        <span>Сканируй</span>
-        <span>И</span>
-        <span>Забирай!</span>
-      </div>
-    </div>
+.brand-logo__inner img {
+  width: 160px;
+  height: auto;
+}
 
-    <div id="menu">
-      <button id="enter">Перейти к розыгрышу</button>
-      <div id="lotteryBar" class="none">
-        <button id="lottery">Начать розыгрыш</button>
-        <button id="reLottery">Переразыграть</button>
-        <div class="fixed-bar">
-          <button id="save" class="fixed-btn">Экспортировать результаты</button>
-          <button id="reset" class="fixed-btn">Сброс</button>
-        </div>
-      </div>
-    </div>
+/* === Меню === */
+#menu {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 100;
+}
 
-    <div class="qipao-container"></div>
+#menu button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  margin: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #ff007a, #7a00ff);
+  box-shadow: 0 0 12px rgba(255, 0, 122, 0.4);
+  transition: all 0.25s ease;
+}
 
-    <!-- 👇 Подключаем игровую логику -->
-    <script src="./lottery/gesture.js"></script>
-    <script type="module" src="./lottery/index.js"></script>
-  </body>
-</html>
+#menu button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(255, 0, 122, 0.6);
+}
+
+/* === QR === */
+.qr-prompt {
+  position: absolute;
+  bottom: 160px;
+  right: 60px;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  z-index: 200;
+  animation: fadeIn 0.8s ease;
+}
+
+.qr-prompt.visible {
+  display: flex;
+}
+
+.qr-placeholder {
+  border: 4px solid #ff007a;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  box-shadow: 0 0 20px rgba(255, 0, 122, 0.4);
+}
+
+.qr-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(255, 0, 122, 0.5);
+}
+
+/* === Карточки === */
+.element {
+  width: 120px;
+  height: 120px;
+  border-radius: 12px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
+  transition: all 0.2s ease-in-out;
+}
+
+.element:hover {
+  transform: scale(1.06);
+  box-shadow: 0 0 20px rgba(255, 0, 122, 0.4);
+}
+
+.element .name {
+  font-size: 14px;
+  line-height: 1.1;
+  padding: 4px 8px;
+  word-wrap: break-word;
+  text-align: center;
+}
+
+/* === Эффекты === */
+.highlight {
+  border: 2px solid rgba(255, 128, 0, 0.85);
+  box-shadow: 0 0 20px rgba(255, 128, 0, 0.5);
+}
+
+.prize {
+  border: 2px solid rgba(255, 0, 122, 0.9);
+  box-shadow: 0 0 25px rgba(255, 0, 122, 0.7);
+}
+
+/* === Пузырьки чата === */
+.qipao-container {
+  position: absolute;
+  bottom: 200px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 500px;
+  text-align: center;
+  z-index: 300;
+}
+
+.qipao-container .qipao {
+  display: inline-block;
+  background: rgba(255, 0, 122, 0.15);
+  border: 1px solid rgba(255, 0, 122, 0.3);
+  border-radius: 20px;
+  padding: 8px 16px;
+  color: #fff;
+  font-size: 15px;
+  animation: fadeIn 0.5s ease, fadeOut 3s 2s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; transform: translateY(-20px); }
+}
+
+/* === Камера для MediaPipe === */
+.camera-pane {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  width: 200px;
+  height: 150px;
+  border: 2px solid #ff007a;
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.camera-pane.mirror video {
+  transform: scaleX(-1);
+}
