@@ -70,7 +70,7 @@
 
     <div class="qipao-container"></div>
 
-    <!-- 👇 подключаем правильные скрипты -->
+    <!-- 👇 Подключаем игровую логику -->
     <script src="./lottery/gesture.js"></script>
     <script type="module" src="./lottery/index.js"></script>
   </body>

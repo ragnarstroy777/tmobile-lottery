@@ -136,7 +136,15 @@ const NUMBER_MATRIX = [
     [2, 4]
   ]
 ];
+const cfgData = {
+  prizes: [
+    { name: "Приз 1", img: "./img/prize1.png" },
+    { name: "Приз 2", img: "./img/prize2.png" },
+    { name: "Приз 3", img: "./img/prize3.png" }
+  ]
+};
 
 module.exports = {
-  NUMBER_MATRIX
+  NUMBER_MATRIX,
+  cfgData
 };
