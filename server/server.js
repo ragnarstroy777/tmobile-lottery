@@ -184,8 +184,9 @@ loadData();
 // ---- Ping ----
 app.get("/ping", (req, res) => res.json({ status: "ok", message: "pong 🏓" }));
 
-// ---- Static frontend ----
+// ==== static & routes ====
 const staticPath = path.join(__dirname, "../product/src");
+
 app.use(
   express.static(staticPath, {
     setHeaders: (res, filePath) => {
@@ -195,17 +196,11 @@ app.use(
   })
 );
 
-// ---- Главная страница ----
 app.get("/", (req, res) => {
   res.sendFile(path.join(staticPath, "index.html"));
 });
 
-// ---- Catch-all для любых путей фронта ----
-app.get("*", (req, res) => {
-  res.sendFile(path.join(staticPath, "index.html"));
-});
-
-// ---- Запуск на Render ----
+// ==== запуск сервера ====
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`✅ Server running on port ${PORT}`);
