@@ -1,49 +1,55 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
   <head>
-    <title>Розыгрыш призов</title>
     <meta charset="utf-8" />
     <meta
       name="viewport"
       content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
-    <link rel="stylesheet" href="./css/index.css" />
+    <title>Розыгрыш призов</title>
+    <link rel="stylesheet" href="/css/index.css" />
   </head>
 
   <body>
-    <script src="./lib/three.min.js"></script>
-    <script src="./lib/tween.min.js"></script>
-    <script src="./lib/TrackballControls.js"></script>
-    <script src="./lib/CSS3DRenderer.js"></script>
+    <!-- Three.js и вспомогательные библиотеки -->
+    <script src="/lib/three.min.js"></script>
+    <script src="/lib/tween.min.js"></script>
+    <script src="/lib/TrackballControls.js"></script>
+    <script src="/lib/CSS3DRenderer.js"></script>
 
     <!-- MediaPipe -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 
+    <!-- Canvas -->
     <div class="canvas-box">
       <canvas id="canvas">Ваш браузер не поддерживает canvas</canvas>
     </div>
 
+    <!-- Музыка -->
     <div class="music">
-      <audio id="music" src="./data/music.mp3" class="music-item" loop></audio>
+      <audio id="music" src="/data/music.mp3" class="music-item" loop></audio>
       <div id="musicBox" class="music-box" title="Воспроизвести/Пауза фоновой музыки">
         Музыка
       </div>
     </div>
 
+    <!-- Логотип -->
     <div class="brand-logo">
       <div class="brand-logo__inner">
-        <img src="./img/timobile-logo.svg" alt="Логотип T-Mobile" />
+        <img src="/img/timobile-logo.svg" alt="Логотип T-Mobile" />
       </div>
     </div>
 
+    <!-- Контейнеры -->
     <div id="prizeBar"></div>
     <div id="container"></div>
 
+    <!-- QR-код -->
     <div id="qrPrompt" class="qr-prompt">
       <img
-        src="./img/qrcode.svg"
+        src="/img/qrcode.svg"
         alt="QR-код"
         class="qr-placeholder"
         width="188"
@@ -56,6 +62,7 @@
       </div>
     </div>
 
+    <!-- Меню -->
     <div id="menu">
       <button id="enter">Перейти к розыгрышу</button>
       <div id="lotteryBar" class="none">
@@ -70,9 +77,8 @@
 
     <div class="qipao-container"></div>
 
-    <!-- 👇 подключаем правильные скрипты -->
-   <script type="module" src="./lottery/gesture.js"></script>
-<script type="module" src="./lottery/index.js"></script>
-
+    <!-- Игровая логика -->
+    <script src="/lottery/gesture.js" type="module"></script>
+    <script src="/lottery/index.js" type="module"></script>
   </body>
 </html>

@@ -197,7 +197,14 @@ app.use(
 );
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(staticPath, "index.html"));
+  const filePath = path.join(staticPath, "index.html");
+  console.log("📄 Отправляю файл:", filePath);
+  res.sendFile(filePath, err => {
+    if (err) {
+      console.error("❌ Ошибка отправки index.html:", err);
+      res.status(500).send("Ошибка при загрузке index.html");
+    }
+  });
 });
 
 // ==== запуск сервера ====
